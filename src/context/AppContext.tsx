@@ -313,32 +313,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load initial data
   useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Load menu
-        dispatch({ type: 'SET_LOADING', payload: { key: 'menu', loading: true } });
-        const menuResponse = await apiClient.getMenu();
-        if (menuResponse.success && menuResponse.data) {
-          const transformedMenu = menuResponse.data.map(transformApiMenuItem);
-          dispatch({ type: 'LOAD_MENU', payload: transformedMenu });
+    const loadInitialData = () => {
+      // Load mock menu data
+      const mockMenu: MenuItem[] = [
+        {
+          id: '1',
+          name: 'ผัดไทย',
+          description: 'ผัดไทยรสชาติดั้งเดิม หอมหวานกำลังดี',
+          price: 60,
+          originalPrice: 80,
+          isOnPromotion: true,
+          image: 'https://images.pexels.com/photos/4518843/pexels-photo-4518843.jpeg',
+          category: 'อาหารจานหลัก',
+          available: true
+        },
+        {
+          id: '2',
+          name: 'ต้มยำกุ้ง',
+          description: 'ต้มยำกุ้งน้ำใส รสเปรี้ยวเผ็ดจัดจ้าน',
+          price: 120,
+          isOnPromotion: false,
+          image: 'https://images.pexels.com/photos/4518843/pexels-photo-4518843.jpeg',
+          category: 'ซุป',
+          available: true
+        },
+        {
+          id: '3',
+          name: 'ส้มตำไทย',
+          description: 'ส้มตำไทยรสชาติต้นตำรับ เผ็ดร้อนจัดจ้าน',
+          price: 45,
+          isOnPromotion: false,
+          image: 'https://images.pexels.com/photos/4518843/pexels-photo-4518843.jpeg',
+          category: 'สลัด',
+          available: true
         }
+      ];
 
-        // Load restaurant settings
-        dispatch({ type: 'SET_LOADING', payload: { key: 'brandSettings', loading: true } });
-        const settingsResponse = await apiClient.getRestaurantSettings();
-        if (settingsResponse.success && settingsResponse.data) {
-          const transformedSettings = transformApiRestaurantSettings(settingsResponse.data);
-          dispatch({ type: 'LOAD_BRAND_SETTINGS', payload: transformedSettings });
-        }
-      } catch (error) {
-        console.error('Failed to load initial data:', error);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to load data from server' });
-        dispatch({ type: 'SET_LOADING', payload: { key: 'menu', loading: false } });
-        dispatch({ type: 'SET_LOADING', payload: { key: 'brandSettings', loading: false } });
-      }
+      dispatch({ type: 'LOAD_MENU', payload: mockMenu });
+      dispatch({ type: 'SET_LOADING', payload: { key: 'brandSettings', loading: false } });
     };
 
-    loadInitialData();
+    // Use setTimeout to simulate async loading
+    setTimeout(loadInitialData, 500);
   }, []);
 
   // Enhanced dispatch with API integration
