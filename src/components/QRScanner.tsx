@@ -71,16 +71,16 @@ export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps
             isScanning 
               ? `bg-gradient-to-br from-orange-50 to-red-50 shadow-orange-200` 
               : `bg-white shadow-gray-200`
-               style={{ 
-                 borderColor: isScanning ? state.brandSettings.primaryColor : '#fed7aa'
-               }}
-          }`}>
+          }`}
+          style={{ 
+            borderColor: isScanning ? state.brandSettings.primaryColor : '#fed7aa'
+          }}>
             <QrCode className={`h-36 w-36 transition-all duration-500 ${
               isScanning ? 'animate-pulse' : 'text-gray-400'
-                     style={{ 
-                       color: isScanning ? state.brandSettings.primaryColor : undefined
-                     }}
-            }`} />
+            }`}
+            style={{ 
+              color: isScanning ? state.brandSettings.primaryColor : undefined
+            }} />
           </div>
           
           {isScanning && (
