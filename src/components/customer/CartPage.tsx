@@ -119,31 +119,27 @@ export default function CartPage({ tableId, onBack, onOrderConfirmed }: CartPage
                     </button>
                   </div>
                   
-                  <>
-                    <div className="flex items-center space-x-2">
-                      {item.isOnPromotion && item.originalPrice && (
-                        <span className="text-xs text-gray-400 line-through">
-                          ฿{item.originalPrice}
-                        </span>
-                      )}
-                      <span className={`text-sm ${
-                        item.isOnPromotion ? 'text-red-600' : 'text-gray-600'
-                      }`}>
-                        ฿{item.price} x {item.quantity}
+                  <div className="flex items-center space-x-2">
+                    {item.isOnPromotion && item.originalPrice && (
+                      <span className="text-xs text-gray-400 line-through">
+                        ฿{item.originalPrice}
                       </span>
-                    </div>
-                    <span className="font-bold text-orange-500">
-                      ฿{(item.price * item.quantity).toLocaleString()}
+                    )}
+                    <span className={`text-sm ${
+                      item.isOnPromotion ? 'text-red-600' : 'text-gray-600'
+                    }`}>
+                      ฿{item.price} x {item.quantity}
                     </span>
-                    <button
-                      onClick={() => updateQuantity(item.id, 0)}
-                      className="text-red-500 hover:text-red-600 p-1 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </>
-                    </div>
                   </div>
+                  <span className="font-bold text-orange-500">
+                    ฿{(item.price * item.quantity).toLocaleString()}
+                  </span>
+                  <button
+                    onClick={() => updateQuantity(item.id, 0)}
+                    className="text-red-500 hover:text-red-600 p-1 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </div>
