@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Integration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>QR Order System - API Integration Test</h1>
+    
+    <button onclick="testMenu()">Test Menu API</button>
+    <button onclick="testSettings()">Test Restaurant Settings</button>
+    <button onclick="testCreateOrder()">Test Create Order</button>
+    <button onclick="testGetOrders()">Test Get Orders</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        const resultsDiv = document.getElementById('results');
+
+        function addResult(title, data, isSuccess = true) {
+            const div = document.createElement('div');
+            div.className = `result ${isSuccess ? 'success' : 'error'}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            resultsDiv.appendChild(div);
+        }
+
+        async function testMenu() {
+            try {
+                const response = await fetch(`${API_BASE}/menu`);
+                const data = await response.json();
+                addResult('Menu API Test', data);
+            } catch (error) {
+                addResult('Menu API Error', error.message, false);
+            }
+        }
+
+        async function testSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/restaurant/settings`);
+                const data = await response.json();
+                addResult('Restaurant Settings Test', data);
+            } catch (error) {
+                addResult('Settings API Error', error.message, false);
+            }
+        }
+
+        async function testCreateOrder() {
+            try {
+                const orderData = {
+                    tableId: 1,
+                    items: [
+                        { menuId: 1, quantity: 1, notes: "ทดสอบจาก HTML" }
+                    ],
+                    notes: "Test order from HTML",
+                    customerName: "Test Customer",
+                    customerPhone: "081-111-1111"
+                };
+
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                const data = await response.json();
+                addResult('Create Order Test', data);
+            } catch (error) {
+                addResult('Create Order Error', error.message, false);
+            }
+        }
+
+        async function testGetOrders() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/orders`);
+                const data = await response.json();
+                addResult('Get Orders Test', data);
+            } catch (error) {
+                addResult('Get Orders Error', error.message, false);
+            }
+        }
+    </script>
+</body>
+</html>

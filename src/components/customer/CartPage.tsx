@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Plus, Minus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 interface CartPageProps {

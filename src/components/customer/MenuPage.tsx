@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import MenuItemModal from './MenuItemModal';
 import { MenuItem } from '../../context/AppContext';
-import { Tag } from 'lucide-react';
+import { Tag, Loader2, Utensils } from 'lucide-react';
 
 const categories = [
   { id: 'all', name: 'ทั้งหมด' },
@@ -23,6 +23,39 @@ export default function MenuPage() {
     : state.menu.filter(item => item.category === selectedCategory && item.available);
 
   const promotionItems = state.menu.filter(item => item.isOnPromotion && item.available);
+
+  // Show loading state
+  if (state.loading.menu) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">กำลังโหลดเมนู...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (state.error && state.menu.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Utensils className="h-10 w-10 text-red-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">ไม่สามารถโหลดเมนูได้</h3>
+          <p className="text-gray-600 mb-4">{state.error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            ลองใหม่
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-6">

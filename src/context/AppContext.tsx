@@ -1,4 +1,14 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import apiClient from '../services/api';
+import {
+  transformApiMenuItem,
+  transformApiOrder,
+  transformApiRestaurantSettings,
+  transformToApiOrderRequest,
+  transformToApiOrderStatus,
+  transformToApiPaymentStatus,
+  transformToApiPaymentMethod,
+} from '../services/transformers';
 
 export interface MenuItem {
   id: string;
@@ -52,6 +62,13 @@ interface AppState {
   orders: Order[];
   currentOrder: Order | null;
   brandSettings: BrandSettings;
+  loading: {
+    menu: boolean;
+    orders: boolean;
+    brandSettings: boolean;
+    placingOrder: boolean;
+  };
+  error: string | null;
 }
 
 type AppAction =
@@ -66,79 +83,16 @@ type AppAction =
   | { type: 'ADD_MENU_ITEM'; payload: MenuItem }
   | { type: 'UPDATE_MENU_ITEM'; payload: MenuItem }
   | { type: 'TOGGLE_MENU_AVAILABILITY'; payload: { id: string } }
-  | { type: 'UPDATE_BRAND_SETTINGS'; payload: Partial<BrandSettings> };
-
-const initialMenu: MenuItem[] = [
-  {
-    id: '1',
-    name: 'ผัดไทยกุ้งสด',
-    description: 'ผัดไทยกุ้งสดใหญ่ หวานมัน กลมกล่อม',
-    price: 89,
-    originalPrice: 120,
-    isOnPromotion: true,
-    image: 'https://images.pexels.com/photos/4393668/pexels-photo-4393668.jpeg',
-    category: 'main',
-    available: true,
-  },
-  {
-    id: '2',
-    name: 'ต้มยำกุ้งน้ำข้น',
-    description: 'ต้มยำรสจัดจ้าน เปรี้ยว เผ็ด หอม',
-    price: 150,
-    originalPrice: 150,
-    isOnPromotion: false,
-    image: 'https://images.pexels.com/photos/16743486/pexels-photo-16743486.jpeg',
-    category: 'soup',
-    available: true,
-  },
-  {
-    id: '3',
-    name: 'ข้าวผัดปู',
-    description: 'ข้าวผัดปูเนื้อแน่น หอมหัวหอม',
-    price: 129,
-    originalPrice: 180,
-    isOnPromotion: true,
-    image: 'https://images.pexels.com/photos/8697523/pexels-photo-8697523.jpeg',
-    category: 'main',
-    available: true,
-  },
-  {
-    id: '4',
-    name: 'ส้มตำไทย',
-    description: 'ส้มตำรสชาติดั้งเดิม เปรี้ยวหวานเผ็ด',
-    price: 80,
-    originalPrice: 80,
-    isOnPromotion: false,
-    image: 'https://images.pexels.com/photos/4113670/pexels-photo-4113670.jpeg',
-    category: 'salad',
-    available: true,
-  },
-  {
-    id: '5',
-    name: 'มะม่วงข้าวเหนียว',
-    description: 'มะม่วงสุกหวาน เสิร์ฟกับข้าวเหนียวหอม',
-    price: 59,
-    originalPrice: 90,
-    isOnPromotion: true,
-    image: 'https://images.pexels.com/photos/5625120/pexels-photo-5625120.jpeg',
-    category: 'dessert',
-    available: true,
-  },
-  {
-    id: '6',
-    name: 'น้ำมะนาวโซดา',
-    description: 'น้ำมะนาวโซดาสดชื่น หวานเปรี้ยว',
-    price: 45,
-    originalPrice: 45,
-    isOnPromotion: false,
-    image: 'https://images.pexels.com/photos/1337824/pexels-photo-1337824.jpeg',
-    category: 'drink',
-    available: true,
-  }
-];
+  | { type: 'UPDATE_BRAND_SETTINGS'; payload: Partial<BrandSettings> }
+  | { type: 'SET_LOADING'; payload: { key: keyof AppState['loading']; loading: boolean } }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'LOAD_MENU'; payload: MenuItem[] }
+  | { type: 'LOAD_ORDERS'; payload: Order[] }
+  | { type: 'LOAD_BRAND_SETTINGS'; payload: BrandSettings }
+  | { type: 'ORDER_PLACED_SUCCESS'; payload: Order };
 
 const initialState: AppState = {
-  menu: initialMenu,
+  menu: [],
   cart: [],
   orders: [],
   currentOrder: null,
@@ -156,7 +110,14 @@ const initialState: AppState = {
       accountNumber: '123-4-56789-0',
       bankName: 'ธนาคารกสิกรไทย'
     }
-  }
+  },
+  loading: {
+    menu: true,
+    orders: false,
+    brandSettings: true,
+    placingOrder: false,
+  },
+  error: null,
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -198,20 +159,25 @@ function appReducer(state: AppState, action: AppAction): AppState {
         cart: [],
       };
     case 'PLACE_ORDER': {
-      const newOrder: Order = {
-        id: `order-${Date.now()}`,
-        tableId: action.payload.tableId,
-        items: [...state.cart],
-        total: state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        status: 'pending',
-        paymentStatus: action.payload.paymentChoice === 'restaurant' ? 'pay_at_restaurant' : 'unpaid',
-        timestamp: new Date(),
-      };
       return {
         ...state,
-        orders: [...state.orders, newOrder],
-        currentOrder: newOrder,
+        loading: {
+          ...state.loading,
+          placingOrder: true,
+        },
+      };
+    }
+    case 'ORDER_PLACED_SUCCESS': {
+      return {
+        ...state,
+        orders: [...state.orders, action.payload],
+        currentOrder: action.payload,
         cart: [],
+        loading: {
+          ...state.loading,
+          placingOrder: false,
+        },
+        error: null,
       };
     }
     case 'UPDATE_ORDER_STATUS':
@@ -289,6 +255,49 @@ function appReducer(state: AppState, action: AppAction): AppState {
           ...action.payload
         }
       };
+    case 'SET_LOADING':
+      return {
+        ...state,
+        loading: {
+          ...state.loading,
+          [action.payload.key]: action.payload.loading,
+        },
+      };
+    case 'SET_ERROR':
+      return {
+        ...state,
+        error: action.payload,
+      };
+    case 'LOAD_MENU':
+      return {
+        ...state,
+        menu: action.payload,
+        loading: {
+          ...state.loading,
+          menu: false,
+        },
+        error: null,
+      };
+    case 'LOAD_ORDERS':
+      return {
+        ...state,
+        orders: action.payload,
+        loading: {
+          ...state.loading,
+          orders: false,
+        },
+        error: null,
+      };
+    case 'LOAD_BRAND_SETTINGS':
+      return {
+        ...state,
+        brandSettings: action.payload,
+        loading: {
+          ...state.loading,
+          brandSettings: false,
+        },
+        error: null,
+      };
     default:
       return state;
   }
@@ -302,8 +311,102 @@ const AppContext = createContext<{
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  // Load initial data
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        // Load menu
+        dispatch({ type: 'SET_LOADING', payload: { key: 'menu', loading: true } });
+        const menuResponse = await apiClient.getMenu();
+        if (menuResponse.success && menuResponse.data) {
+          const transformedMenu = menuResponse.data.map(transformApiMenuItem);
+          dispatch({ type: 'LOAD_MENU', payload: transformedMenu });
+        }
+
+        // Load restaurant settings
+        dispatch({ type: 'SET_LOADING', payload: { key: 'brandSettings', loading: true } });
+        const settingsResponse = await apiClient.getRestaurantSettings();
+        if (settingsResponse.success && settingsResponse.data) {
+          const transformedSettings = transformApiRestaurantSettings(settingsResponse.data);
+          dispatch({ type: 'LOAD_BRAND_SETTINGS', payload: transformedSettings });
+        }
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load data from server' });
+        dispatch({ type: 'SET_LOADING', payload: { key: 'menu', loading: false } });
+        dispatch({ type: 'SET_LOADING', payload: { key: 'brandSettings', loading: false } });
+      }
+    };
+
+    loadInitialData();
+  }, []);
+
+  // Enhanced dispatch with API integration
+  const enhancedDispatch = async (action: AppAction) => {
+    switch (action.type) {
+      case 'PLACE_ORDER': {
+        dispatch(action); // Set loading state
+        try {
+          const orderRequest = transformToApiOrderRequest(
+            action.payload.tableId,
+            state.cart,
+            'Customer order'
+          );
+          
+          const response = await apiClient.createOrder(orderRequest);
+          if (response.success && response.data) {
+            const transformedOrder = transformApiOrder(response.data);
+            dispatch({ type: 'ORDER_PLACED_SUCCESS', payload: transformedOrder });
+          } else {
+            throw new Error(response.error || 'Failed to place order');
+          }
+        } catch (error) {
+          console.error('Failed to place order:', error);
+          dispatch({ type: 'SET_ERROR', payload: 'Failed to place order' });
+          dispatch({ type: 'SET_LOADING', payload: { key: 'placingOrder', loading: false } });
+        }
+        break;
+      }
+      case 'UPDATE_ORDER_STATUS': {
+        try {
+          const apiStatus = transformToApiOrderStatus(action.payload.status);
+          const response = await apiClient.updateOrderStatus(parseInt(action.payload.orderId), apiStatus);
+          if (response.success) {
+            dispatch(action);
+          }
+        } catch (error) {
+          console.error('Failed to update order status:', error);
+          dispatch({ type: 'SET_ERROR', payload: 'Failed to update order status' });
+        }
+        break;
+      }
+      case 'UPDATE_PAYMENT_STATUS': {
+        try {
+          const apiPaymentStatus = transformToApiPaymentStatus(action.payload.paymentStatus);
+          const apiPaymentMethod = transformToApiPaymentMethod(action.payload.paymentMethod);
+          
+          const response = await apiClient.updatePaymentStatus(parseInt(action.payload.orderId), {
+            paymentStatus: apiPaymentStatus,
+            paymentMethod: apiPaymentMethod,
+            paymentSlip: action.payload.paymentSlip,
+          });
+          
+          if (response.success) {
+            dispatch(action);
+          }
+        } catch (error) {
+          console.error('Failed to update payment status:', error);
+          dispatch({ type: 'SET_ERROR', payload: 'Failed to update payment status' });
+        }
+        break;
+      }
+      default:
+        dispatch(action);
+    }
+  };
+
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider value={{ state, dispatch: enhancedDispatch }}>
       {children}
     </AppContext.Provider>
   );

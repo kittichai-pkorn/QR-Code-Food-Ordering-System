@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, ChefHat, CheckCircle, UtensilsCrossed, AlertCircle, ClipboardList, CreditCard, Eye, DollarSign, X } from 'lucide-react';
+import { Clock, ChefHat, CheckCircle, UtensilsCrossed, AlertCircle, ClipboardList, CreditCard, Eye, DollarSign, X, Loader2, RefreshCw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Order } from '../../context/AppContext';
+import apiClient from '../../services/api';
+import { transformApiOrder } from '../../services/transformers';
 
 const statusConfig = {
   pending: { 
@@ -80,23 +82,43 @@ const paymentStatusConfig = {
 export default function OrderManagement() {
   const { state, dispatch } = useApp();
   const [selectedSlip, setSelectedSlip] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Auto-update some orders for demo
+  // Load orders from API
   useEffect(() => {
-    if (state.orders.length > 0) {
-      const timer = setTimeout(() => {
-        const pendingOrder = state.orders.find(order => order.status === 'pending');
-        if (pendingOrder) {
-          dispatch({
-            type: 'UPDATE_ORDER_STATUS',
-            payload: { orderId: pendingOrder.id, status: 'confirmed' }
-          });
-        }
-      }, 3000);
+    loadOrders();
+  }, []);
 
-      return () => clearTimeout(timer);
+  const loadOrders = async () => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: { key: 'orders', loading: true } });
+      const response = await apiClient.getAllOrders();
+      if (response.success && response.data) {
+        const transformedOrders = response.data.map(transformApiOrder);
+        dispatch({ type: 'LOAD_ORDERS', payload: transformedOrders });
+      }
+    } catch (error) {
+      console.error('Failed to load orders:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load orders' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: { key: 'orders', loading: false } });
     }
-  }, [state.orders, dispatch]);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadOrders();
+    setRefreshing(false);
+  };
+
+  // Auto-refresh orders every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadOrders();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const updateOrderStatus = (orderId: string, status: Order['status']) => {
     dispatch({
@@ -271,14 +293,30 @@ export default function OrderManagement() {
           <h2 className="text-2xl font-bold text-gray-800">
             ออเดอร์ที่ต้องจัดการ ({activeOrders.length})
           </h2>
-          {activeOrders.length > 0 && (
-            <div className="bg-gradient-to-r from-red-100 to-pink-100 text-red-600 px-4 py-2 rounded-full text-sm font-bold border-2 border-red-200 animate-pulse">
-              {activeOrders.filter(o => o.status === 'pending').length} รอยืนยัน
-            </div>
-          )}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || state.loading.orders}
+              className="flex items-center space-x-2 bg-white hover:bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <span>{refreshing ? 'รีเฟรช...' : 'รีเฟรช'}</span>
+            </button>
+            {activeOrders.length > 0 && (
+              <div className="bg-gradient-to-r from-red-100 to-pink-100 text-red-600 px-4 py-2 rounded-full text-sm font-bold border-2 border-red-200 animate-pulse">
+                {activeOrders.filter(o => o.status === 'pending').length} รอยืนยัน
+              </div>
+            )}
+          </div>
         </div>
 
-        {activeOrders.length === 0 ? (
+        {state.loading.orders ? (
+          <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
+            <Loader2 className="h-12 w-12 animate-spin text-orange-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">กำลังโหลดออเดอร์...</h3>
+            <p className="text-gray-500">กรุณารอสักครู่</p>
+          </div>
+        ) : activeOrders.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <ClipboardList className="h-12 w-12 text-gray-400" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, CreditCard, Store, Clock } from 'lucide-react';
+import { ArrowLeft, CreditCard, Store, Clock, Loader2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 interface OrderSummaryPageProps {
@@ -19,20 +19,32 @@ export default function OrderSummaryPage({
 
   const total = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handlePayAtRestaurant = () => {
-    dispatch({ 
-      type: 'PLACE_ORDER', 
-      payload: { tableId, paymentChoice: 'restaurant' } 
-    });
-    onPayAtRestaurant();
+  const handlePayAtRestaurant = async () => {
+    if (state.loading.placingOrder) return;
+    
+    try {
+      await dispatch({ 
+        type: 'PLACE_ORDER', 
+        payload: { tableId, paymentChoice: 'restaurant' } 
+      });
+      onPayAtRestaurant();
+    } catch (error) {
+      console.error('Failed to place order:', error);
+    }
   };
 
-  const handlePayOnline = () => {
-    dispatch({ 
-      type: 'PLACE_ORDER', 
-      payload: { tableId, paymentChoice: 'online' } 
-    });
-    onPayOnline();
+  const handlePayOnline = async () => {
+    if (state.loading.placingOrder) return;
+    
+    try {
+      await dispatch({ 
+        type: 'PLACE_ORDER', 
+        payload: { tableId, paymentChoice: 'online' } 
+      });
+      onPayOnline();
+    } catch (error) {
+      console.error('Failed to place order:', error);
+    }
   };
 
   return (
@@ -100,14 +112,21 @@ export default function OrderSummaryPage({
           
           <button
             onClick={handlePayOnline}
-            className="w-full bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 border-2 border-gray-200 hover:border-blue-300 rounded-2xl p-6 transition-all duration-200 flex items-center space-x-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            disabled={state.loading.placingOrder}
+            className="w-full bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 border-2 border-gray-200 hover:border-blue-300 rounded-2xl p-6 transition-all duration-200 flex items-center space-x-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <CreditCard className="h-6 w-6 text-blue-600" />
+              {state.loading.placingOrder ? (
+                <Loader2 className="h-6 w-6 text-white animate-spin" />
+              ) : (
+                <CreditCard className="h-6 w-6 text-blue-600" />
+              )}
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-bold text-gray-800 text-lg">ชำระเงินทันที</h4>
-              <p className="text-gray-600">ชำระผ่าน QR Code หรือโอนเงิน</p>
+              <p className="text-gray-600">
+                {state.loading.placingOrder ? 'กำลังส่งคำสั่งซื้อ...' : 'ชำระผ่าน QR Code หรือโอนเงิน'}
+              </p>
               <div className="flex items-center space-x-1 mt-1">
                 <Clock className="h-3 w-3 text-green-500" />
                 <span className="text-xs text-green-600 font-medium">⚡ เริ่มทำอาหารทันที</span>
@@ -120,14 +139,21 @@ export default function OrderSummaryPage({
 
           <button
             onClick={handlePayAtRestaurant}
-            className="w-full bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 border-2 border-gray-200 hover:border-orange-300 rounded-2xl p-6 transition-all duration-200 flex items-center space-x-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            disabled={state.loading.placingOrder}
+            className="w-full bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 border-2 border-gray-200 hover:border-orange-300 rounded-2xl p-6 transition-all duration-200 flex items-center space-x-4 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Store className="h-6 w-6 text-orange-600" />
+              {state.loading.placingOrder ? (
+                <Loader2 className="h-6 w-6 text-white animate-spin" />
+              ) : (
+                <Store className="h-6 w-6 text-orange-600" />
+              )}
             </div>
             <div className="flex-1 text-left">
               <h4 className="font-bold text-gray-800 text-lg">ชำระเงินที่ร้าน</h4>
-              <p className="text-gray-600">ชำระเงินเมื่อรับอาหาร</p>
+              <p className="text-gray-600">
+                {state.loading.placingOrder ? 'กำลังส่งคำสั่งซื้อ...' : 'ชำระเงินเมื่อรับอาหาร'}
+              </p>
               <div className="flex items-center space-x-1 mt-1">
                 <Clock className="h-3 w-3 text-orange-500" />
                 <span className="text-xs text-orange-600 font-medium">⏳ รอการยืนยันจากพนักงาน</span>
