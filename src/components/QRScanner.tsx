@@ -124,24 +124,3 @@ export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps
     </div>
   );
 }
-              <button
-                key={table}
-                onClick={() => handleScanDemo(table)}
-                className="w-full bg-white hover:bg-orange-50 border-2 border-orange-200 hover:border-orange-300 rounded-xl p-4 transition-all duration-200 flex items-center justify-center space-x-3"
-              >
-                <ShoppingBag className="h-5 w-5 text-orange-500" />
-                <span className="font-medium text-gray-700">โต๊ะ {table}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
-            สแกน QR Code เพื่อเริ่มสั่งอาหาร
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
