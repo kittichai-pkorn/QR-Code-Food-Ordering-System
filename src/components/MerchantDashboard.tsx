@@ -3,14 +3,15 @@ import OrderManagement from './merchant/OrderManagement';
 import MenuManagement from './merchant/MenuManagement';
 import BrandingSettings from './merchant/BrandingSettings';
 import SalesReport from './merchant/SalesReport';
-import { ArrowLeft, ClipboardList, Menu, Palette, BarChart3 } from 'lucide-react';
+import TableManagement from './merchant/TableManagement';
+import { ArrowLeft, ClipboardList, Menu, Palette, BarChart3, QrCode } from 'lucide-react';
 
 interface MerchantDashboardProps {
   onBack: () => void;
 }
 
 export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'branding' | 'reports'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'tables' | 'branding' | 'reports'>('orders');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,6 +54,17 @@ export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
             <span className="font-medium">จัดการเมนู</span>
           </button>
           <button
+            onClick={() => setActiveTab('tables')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors whitespace-nowrap ${
+              activeTab === 'tables'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <QrCode className="h-4 w-4" />
+            <span className="font-medium">จัดการโต๊ะ</span>
+          </button>
+          <button
             onClick={() => setActiveTab('branding')}
             className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors whitespace-nowrap ${
               activeTab === 'branding'
@@ -80,6 +92,7 @@ export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
       {/* Content */}
       {activeTab === 'orders' && <OrderManagement />}
       {activeTab === 'menu' && <MenuManagement />}
+      {activeTab === 'tables' && <TableManagement />}
       {activeTab === 'branding' && <BrandingSettings />}
       {activeTab === 'reports' && <SalesReport />}
     </div>
