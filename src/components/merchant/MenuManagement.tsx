@@ -81,7 +81,7 @@ export default function MenuManagement() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                ราคาเต็ม (บาท)
+                ราคาปกติ (บาท)
               </label>
               <input
                 type="number"
@@ -96,7 +96,7 @@ export default function MenuManagement() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  เปิดใช้งานโปรโมชั่น
+                  เปิดใช้งานส่วนลด
                 </label>
                 <button
                   type="button"
@@ -112,12 +112,17 @@ export default function MenuManagement() {
                   />
                 </button>
               </div>
+              {formData.isOnPromotion && (
+                <p className="text-xs text-gray-500 mb-2">
+                  เมื่อเปิดใช้งาน ลูกค้าจะเห็นราคาลดพิเศษ
+                </p>
+              )}
             </div>
 
             {formData.isOnPromotion && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ราคาโปรโมชั่น (บาท)
+                  ราคาลดพิเศษ (บาท)
                 </label>
                 <input
                   type="number"
@@ -129,9 +134,20 @@ export default function MenuManagement() {
                   required
                 />
                 {formData.originalPrice > 0 && formData.price > 0 && formData.price < formData.originalPrice && (
-                  <p className="text-sm text-green-600 mt-1">
-                    ประหยัด ฿{formData.originalPrice - formData.price} ({Math.round((1 - formData.price / formData.originalPrice) * 100)}%)
-                  </p>
+                  <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-green-700">ลูกค้าประหยัด</span>
+                      <span className="font-semibold text-green-600">
+                        ฿{formData.originalPrice - formData.price}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-green-600">เปอร์เซ็นต์ส่วนลด</span>
+                      <span className="font-semibold text-green-600">
+                        {Math.round((1 - formData.price / formData.originalPrice) * 100)}%
+                      </span>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
@@ -275,9 +291,9 @@ export default function MenuManagement() {
                             <span className="text-sm text-gray-400 line-through">
                               ฿{item.originalPrice}
                             </span>
-                            <div className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full flex items-center space-x-1">
+                            <div className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full font-medium flex items-center space-x-1">
                               <Tag className="h-3 w-3" />
-                              <span>-{Math.round((1 - item.price / item.originalPrice) * 100)}%</span>
+                              <span>ลด {Math.round((1 - item.price / item.originalPrice) * 100)}%</span>
                             </div>
                           </>
                         )}

@@ -61,7 +61,7 @@ export default function MenuPage() {
                 {item.isOnPromotion && (
                   <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1">
                     <Tag className="h-3 w-3" />
-                    <span>โปรโมชั่น</span>
+                    <span>ลด {Math.round((1 - item.price / (item.originalPrice || item.price)) * 100)}%</span>
                   </div>
                 )}
               </div>
