@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import OrderManagement from './merchant/OrderManagement';
 import MenuManagement from './merchant/MenuManagement';
 import BrandingSettings from './merchant/BrandingSettings';
-import { ArrowLeft, ClipboardList, Menu, Palette } from 'lucide-react';
+import SalesReport from './merchant/SalesReport';
+import { ArrowLeft, ClipboardList, Menu, Palette, BarChart3 } from 'lucide-react';
 
 interface MerchantDashboardProps {
   onBack: () => void;
 }
 
 export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'branding'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'branding' | 'reports'>('orders');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -62,6 +63,17 @@ export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
             <Palette className="h-4 w-4" />
             <span className="font-medium">ปรับแต่งแบรนด์</span>
           </button>
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors whitespace-nowrap ${
+              activeTab === 'reports'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span className="font-medium">รายงานยอดขาย</span>
+          </button>
         </div>
       </div>
 
@@ -69,6 +81,7 @@ export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
       {activeTab === 'orders' && <OrderManagement />}
       {activeTab === 'menu' && <MenuManagement />}
       {activeTab === 'branding' && <BrandingSettings />}
+      {activeTab === 'reports' && <SalesReport />}
     </div>
   );
 }
