@@ -130,74 +130,76 @@ export default function OrderManagement() {
     const timeAgo = Math.floor((Date.now() - order.timestamp.getTime()) / 60000);
 
     return (
-      <div className={`bg-white rounded-xl p-4 shadow-sm border-l-4 ${config.border}`}>
-        <div className="flex justify-between items-start mb-3">
+      <div className={`bg-white rounded-2xl p-6 shadow-lg border-l-8 ${config.border} hover:shadow-xl transition-all duration-200`}>
+        <div className="flex justify-between items-start mb-4">
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <span className="font-bold text-gray-800">โต๊ะ {order.tableId}</span>
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+              <span className="font-bold text-gray-800 text-xl">โต๊ะ {order.tableId}</span>
+              <span className="text-xs bg-gray-100 px-3 py-1 rounded-full font-mono">
                 #{order.id.split('-')[1]}
               </span>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-gray-500 font-medium">
               {timeAgo < 1 ? 'เพิ่งสั่ง' : `${timeAgo} นาทีที่แล้ว`}
             </p>
           </div>
           
-          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${config.bg}`}>
+          <div className="flex flex-col space-y-2">
+            <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${config.bg} border-2 ${config.border}`}>
             <StatusIcon className={`h-4 w-4 ${config.color}`} />
-            <span className={`text-sm font-medium ${config.color}`}>
+              <span className={`text-sm font-bold ${config.color}`}>
               {config.text}
             </span>
           </div>
           
-          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${paymentConfig.bg}`}>
+            <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${paymentConfig.bg} border-2 ${paymentConfig.border}`}>
             <PaymentIcon className={`h-4 w-4 ${paymentConfig.color}`} />
-            <span className={`text-sm font-medium ${paymentConfig.color}`}>
+              <span className={`text-sm font-bold ${paymentConfig.color}`}>
               {paymentConfig.text}
             </span>
           </div>
+          </div>
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-3 mb-6">
           {order.items.map((item, index) => (
-            <div key={index} className="flex justify-between items-center text-sm">
+            <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
               <div>
-                <span className="font-medium">{item.name}</span>
-                <span className="text-gray-500 ml-2">x{item.quantity}</span>
+                <span className="font-bold text-gray-800">{item.name}</span>
+                <span className="text-gray-600 ml-2 font-medium">x{item.quantity}</span>
                 {item.notes && (
-                  <p className="text-xs text-orange-600 mt-1">
+                  <p className="text-xs text-orange-600 mt-1 bg-orange-50 px-2 py-1 rounded-lg inline-block">
                     หมายเหตุ: {item.notes}
                   </p>
                 )}
               </div>
-              <span className="font-medium">
+              <span className="font-bold text-lg">
                 ฿{(item.price * item.quantity).toLocaleString()}
               </span>
             </div>
           ))}
         </div>
 
-        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-          <div className="font-bold text-lg">
+        <div className="flex justify-between items-center pt-4 border-t-2 border-gray-200">
+          <div className="font-bold text-2xl text-orange-500">
             รวม ฿{order.total.toLocaleString()}
           </div>
           
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             {/* Payment Actions */}
             {order.paymentStatus === 'pending_verification' && (
               <>
                 {order.paymentSlip ? (
                   <button
                     onClick={() => setSelectedSlip(order.paymentSlip!)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 flex items-center space-x-1 shadow-lg"
                   >
                     <Eye className="h-4 w-4" />
                     <span>ดูสลิป</span>
                   </button>
                 ) : (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
-                    <p className="text-xs text-yellow-700">
+                  <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl px-3 py-2">
+                    <p className="text-xs text-yellow-700 font-medium">
                       ลูกค้าแจ้งโอนแล้ว<br />
                       (ไม่ได้แนบสลิป)
                     </p>
@@ -209,7 +211,7 @@ export default function OrderManagement() {
             {order.paymentStatus === 'pending_verification' && (
               <button
                 onClick={() => confirmPayment(order.id)}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 flex items-center space-x-1 shadow-lg"
               >
                 <DollarSign className="h-4 w-4" />
                 <span>ยืนยันชำระ</span>
@@ -220,7 +222,7 @@ export default function OrderManagement() {
             {config.nextStatus && order.paymentStatus === 'paid' && (
               <button
                 onClick={() => updateOrderStatus(order.id, config.nextStatus!)}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 shadow-lg"
               >
                 {config.nextStatus === 'confirmed' && 'รับออเดอร์'}
                 {config.nextStatus === 'preparing' && 'เริ่มทำ'}
@@ -235,7 +237,7 @@ export default function OrderManagement() {
                 {config.nextStatus && (
                   <button
                     onClick={() => updateOrderStatus(order.id, config.nextStatus!)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 shadow-lg"
                   >
                     {config.nextStatus === 'confirmed' && 'รับออเดอร์'}
                     {config.nextStatus === 'preparing' && 'เริ่มทำ'}
@@ -247,7 +249,7 @@ export default function OrderManagement() {
                 {order.status === 'served' && (
                   <button
                     onClick={() => completeOrder(order.id)}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 flex items-center space-x-1 shadow-lg"
                   >
                     <DollarSign className="h-4 w-4" />
                     <span>ปิดบิล</span>
@@ -262,32 +264,34 @@ export default function OrderManagement() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-6 space-y-8 bg-gray-50 min-h-screen">
       {/* Active Orders */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">
             ออเดอร์ที่ต้องจัดการ ({activeOrders.length})
           </h2>
           {activeOrders.length > 0 && (
-            <div className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">
+            <div className="bg-gradient-to-r from-red-100 to-pink-100 text-red-600 px-4 py-2 rounded-full text-sm font-bold border-2 border-red-200 animate-pulse">
               {activeOrders.filter(o => o.status === 'pending').length} รอยืนยัน
             </div>
           )}
         </div>
 
         {activeOrders.length === 0 ? (
-          <div className="bg-white rounded-xl p-8 text-center">
-            <ClipboardList className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">
+          <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ClipboardList className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-600 mb-3">
               ไม่มีออเดอร์ใหม่
             </h3>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-lg">
               เมื่อมีลูกค้าสั่งอาหาร ออเดอร์จะแสดงที่นี่
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {activeOrders
               .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
               .map((order) => (
@@ -300,10 +304,10 @@ export default function OrderManagement() {
       {/* Completed Orders */}
       {completedOrders.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
             ออเดอร์ที่เสร็จแล้ว ({completedOrders.length})
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {completedOrders
               .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
               .slice(0, 5)
@@ -316,13 +320,13 @@ export default function OrderManagement() {
       
       {/* Payment Slip Modal */}
       {selectedSlip && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">หลักฐานการโอนเงิน</h3>
+              <h3 className="text-xl font-bold">หลักฐานการโอนเงิน</h3>
               <button
                 onClick={() => setSelectedSlip(null)}
-                className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="text-gray-500 hover:text-gray-700 p-3 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -331,13 +335,13 @@ export default function OrderManagement() {
             <img
               src={selectedSlip}
               alt="Payment slip"
-              className="w-full rounded-lg"
+              className="w-full rounded-xl shadow-lg"
             />
             
-            <div className="flex space-x-3 mt-6">
+            <div className="mt-6">
               <button
                 onClick={() => setSelectedSlip(null)}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-lg font-medium transition-colors"
+                className="w-full bg-gradient-to-r from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 text-gray-800 py-4 rounded-xl font-bold text-lg transition-all duration-200"
               >
                 ปิด
               </button>
