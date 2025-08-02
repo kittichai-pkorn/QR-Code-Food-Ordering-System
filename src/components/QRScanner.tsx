@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { QrCode, Utensils, ShoppingBag, Settings } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 interface QRScannerProps {
   onScan: (tableId: string) => void;
@@ -7,6 +8,7 @@ interface QRScannerProps {
 }
 
 export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps) {
+  const { state } = useApp();
   const [isScanning, setIsScanning] = useState(false);
 
   const handleScanDemo = (tableNumber: string) => {
@@ -22,12 +24,19 @@ export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-sm shadow-lg p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-            <Utensils className="h-6 w-6 text-white" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg"
+               style={{ 
+                 background: `linear-gradient(135deg, ${state.brandSettings.primaryColor}, ${state.brandSettings.secondaryColor})` 
+               }}>
+            {state.brandSettings.logo ? (
+              <img src={state.brandSettings.logo} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <Utensils className="h-6 w-6 text-white" />
+            )}
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-800">QR Food</h1>
-            <p className="text-xs text-gray-500">ระบบสั่งอาหารออนไลน์</p>
+            <h1 className="text-xl font-bold text-gray-800">{state.brandSettings.restaurantName}</h1>
+            <p className="text-xs text-gray-500">{state.brandSettings.description}</p>
           </div>
         </div>
         <button
@@ -42,7 +51,10 @@ export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+               style={{ 
+                 background: `linear-gradient(135deg, ${state.brandSettings.primaryColor}, ${state.brandSettings.secondaryColor})` 
+               }}>
             <QrCode className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-800 mb-3">
@@ -57,18 +69,25 @@ export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps
         <div className="relative mb-12">
           <div className={`w-72 h-72 border-4 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-xl ${
             isScanning 
-              ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-red-50 shadow-orange-200' 
-              : 'border-orange-200 bg-white shadow-gray-200'
+              ? `bg-gradient-to-br from-orange-50 to-red-50 shadow-orange-200` 
+              : `bg-white shadow-gray-200`
+               style={{ 
+                 borderColor: isScanning ? state.brandSettings.primaryColor : '#fed7aa'
+               }}
           }`}>
             <QrCode className={`h-36 w-36 transition-all duration-500 ${
-              isScanning ? 'text-orange-500 animate-pulse' : 'text-gray-400'
+              isScanning ? 'animate-pulse' : 'text-gray-400'
+                     style={{ 
+                       color: isScanning ? state.brandSettings.primaryColor : undefined
+                     }}
             }`} />
           </div>
           
           {isScanning && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-orange-500 mx-auto mb-3"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-3 mx-auto mb-3"
+                     style={{ borderBottomColor: state.brandSettings.primaryColor }}></div>
                 <p className="text-gray-700 font-medium">กำลังสแกน...</p>
               </div>
             </div>
@@ -86,9 +105,17 @@ export default function QRScanner({ onScan, onSwitchToMerchant }: QRScannerProps
                 <button
                   key={table}
                   onClick={() => handleScanDemo(table)}
-                  className="bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 border-2 border-orange-200 hover:border-orange-300 rounded-2xl p-6 transition-all duration-200 flex flex-col items-center justify-center space-y-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="bg-white hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 border-2 rounded-2xl p-6 transition-all duration-200 flex flex-col items-center justify-center space-y-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  style={{ 
+                    borderColor: '#fed7aa',
+                    '--tw-gradient-from': `${state.brandSettings.primaryColor}20`,
+                    '--tw-gradient-to': `${state.brandSettings.secondaryColor}20`
+                  } as React.CSSProperties}
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                       style={{ 
+                         background: `linear-gradient(135deg, ${state.brandSettings.primaryColor}, ${state.brandSettings.secondaryColor})` 
+                       }}>
                     <ShoppingBag className="h-4 w-4 text-white" />
                   </div>
                   <span className="font-semibold text-gray-700">โต๊ะ {table}</span>

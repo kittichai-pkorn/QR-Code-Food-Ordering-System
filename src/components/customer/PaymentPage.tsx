@@ -153,17 +153,17 @@ export default function PaymentPage({ onBack, onPaymentCompleted }: PaymentPageP
             <div className="space-y-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">ชื่อบัญชี</p>
-                <p className="font-semibold text-gray-800">ร้านอาหารดีลิเชียส</p>
+                <p className="font-semibold text-gray-800">{state.brandSettings.bankAccount.accountName}</p>
               </div>
               
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">เลขที่บัญชี</p>
-                <p className="font-mono font-semibold text-gray-800">123-4-56789-0</p>
+                <p className="font-mono font-semibold text-gray-800">{state.brandSettings.bankAccount.accountNumber}</p>
               </div>
               
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">ธนาคาร</p>
-                <p className="font-semibold text-gray-800">ธนาคารกสิกรไทย</p>
+                <p className="font-semibold text-gray-800">{state.brandSettings.bankAccount.bankName}</p>
               </div>
               
               <div className="bg-orange-50 p-4 rounded-lg">

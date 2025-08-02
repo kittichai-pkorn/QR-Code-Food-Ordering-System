@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import OrderManagement from './merchant/OrderManagement';
 import MenuManagement from './merchant/MenuManagement';
-import { ArrowLeft, ClipboardList, Menu } from 'lucide-react';
+import BrandingSettings from './merchant/BrandingSettings';
+import { ArrowLeft, ClipboardList, Menu, Palette } from 'lucide-react';
 
 interface MerchantDashboardProps {
   onBack: () => void;
 }
 
 export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'orders' | 'menu'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'branding'>('orders');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,7 +28,7 @@ export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
           <button
             onClick={() => setActiveTab('orders')}
             className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors ${
@@ -50,12 +51,24 @@ export default function MerchantDashboard({ onBack }: MerchantDashboardProps) {
             <Menu className="h-4 w-4" />
             <span className="font-medium">จัดการเมนู</span>
           </button>
+          <button
+            onClick={() => setActiveTab('branding')}
+            className={`flex-1 flex items-center justify-center space-x-2 py-2 px-4 rounded-md transition-colors whitespace-nowrap ${
+              activeTab === 'branding'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <Palette className="h-4 w-4" />
+            <span className="font-medium">ปรับแต่งแบรนด์</span>
+          </button>
         </div>
       </div>
 
       {/* Content */}
       {activeTab === 'orders' && <OrderManagement />}
       {activeTab === 'menu' && <MenuManagement />}
+      {activeTab === 'branding' && <BrandingSettings />}
     </div>
   );
 }

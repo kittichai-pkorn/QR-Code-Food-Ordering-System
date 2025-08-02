@@ -30,11 +30,28 @@ export interface Order {
   notes?: string;
 }
 
+export interface BrandSettings {
+  restaurantName: string;
+  description: string;
+  logo: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  phone: string;
+  address: string;
+  bankAccount: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+  };
+}
+
 interface AppState {
   menu: MenuItem[];
   cart: CartItem[];
   orders: Order[];
   currentOrder: Order | null;
+  brandSettings: BrandSettings;
 }
 
 type AppAction =
@@ -48,7 +65,8 @@ type AppAction =
   | { type: 'COMPLETE_ORDER'; payload: { orderId: string } }
   | { type: 'ADD_MENU_ITEM'; payload: MenuItem }
   | { type: 'UPDATE_MENU_ITEM'; payload: MenuItem }
-  | { type: 'TOGGLE_MENU_AVAILABILITY'; payload: { id: string } };
+  | { type: 'TOGGLE_MENU_AVAILABILITY'; payload: { id: string } }
+  | { type: 'UPDATE_BRAND_SETTINGS'; payload: Partial<BrandSettings> };
 
 const initialMenu: MenuItem[] = [
   {
@@ -124,6 +142,21 @@ const initialState: AppState = {
   cart: [],
   orders: [],
   currentOrder: null,
+  brandSettings: {
+    restaurantName: 'ร้านอาหารดีลิเชียส',
+    description: 'อาหารไทยรสชาติดั้งเดิม สดใหม่ทุกวัน',
+    logo: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
+    primaryColor: '#f97316',
+    secondaryColor: '#ef4444',
+    accentColor: '#eab308',
+    phone: '02-123-4567',
+    address: '123 ถนนสุขุมวิท กรุงเทพฯ 10110',
+    bankAccount: {
+      accountName: 'ร้านอาหารดีลิเชียส',
+      accountNumber: '123-4-56789-0',
+      bankName: 'ธนาคารกสิกรไทย'
+    }
+  }
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -247,6 +280,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
             ? { ...item, available: !item.available }
             : item
         ),
+      };
+    case 'UPDATE_BRAND_SETTINGS':
+      return {
+        ...state,
+        brandSettings: {
+          ...state.brandSettings,
+          ...action.payload
+        }
       };
     default:
       return state;

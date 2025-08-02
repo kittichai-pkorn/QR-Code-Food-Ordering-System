@@ -38,7 +38,10 @@ export default function CustomerApp({ tableId, onBack }: CustomerAppProps) {
         {currentPage === 'menu' && (
           <button
             onClick={() => setCurrentPage('cart')}
-            className="relative bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full transition-colors"
+            className="relative text-white p-3 rounded-full transition-colors shadow-lg"
+            style={{ 
+              background: `linear-gradient(135deg, ${state.brandSettings.primaryColor}, ${state.brandSettings.secondaryColor})` 
+            }}
           >
             <ShoppingCart className="h-5 w-5" />
             {cartItemCount > 0 && (
