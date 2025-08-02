@@ -106,12 +106,26 @@ class ApiClient {
         ...options,
       });
 
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        // Try to read as text first to avoid JSON parsing errors on HTML error pages
+        const errorText = await response.text();
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        
+        // Try to parse as JSON if it looks like JSON
+        if (errorText.trim().startsWith('{') || errorText.trim().startsWith('[')) {
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            // If JSON parsing fails, use the text as is or default message
+            errorMessage = errorText || errorMessage;
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
+      const data = await response.json();
       return data;
     } catch (error) {
       console.error(`API request failed: ${endpoint}`, error);
